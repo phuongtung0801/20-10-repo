@@ -49,6 +49,95 @@
             }
         }
 
+        /* Password Page Styles */
+        .password-content {
+            max-width: 450px;
+            padding: 50px 40px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .password-content h1 {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            color: #d4a5d4;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .password-content p {
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            color: #7a7a7a;
+        }
+
+        .lock-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: lockShake 2s ease-in-out infinite;
+        }
+
+        @keyframes lockShake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        .password-input-wrapper {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1em;
+            border: 2px solid #e9c4e6;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #4a4a4a;
+            text-align: center;
+            letter-spacing: 3px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .password-input:focus {
+            border-color: #d4a5d4;
+            box-shadow: 0 0 15px rgba(212, 165, 212, 0.3);
+        }
+
+        .password-input.error {
+            border-color: #ff9999;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.9em;
+            margin-top: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .error-message.show {
+            opacity: 1;
+        }
+
+        .password-hint {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 15px;
+            font-style: italic;
+        }
+
         /* Landing Page Styles */
         .landing-content {
             max-width: 600px;
@@ -242,8 +331,30 @@
     </style>
 </head>
 <body>
+    <!-- Password Page -->
+    <div id="passwordPage" class="page active">
+        <div class="password-content">
+            <div class="lock-icon">🔒</div>
+            <h2>Trang này dành cho ai?</h2>
+            <p>Pass là ngày tháng năm sinh của em, viết liền, ví dụ 08012000</p>
+            <div class="password-input-wrapper">
+                <input 
+                    id="passwordInput" 
+                    class="password-input" 
+                    placeholder="Nhập mật khẩu..."
+                    maxlength="8"
+                    autocomplete="off"
+                />
+            </div>
+            <div class="error-message" id="errorMessage">
+                Sai rồi, thử lại nha! 🙈
+            </div>
+            <button onclick="checkPassword()">Xác nhận ✨</button>
+        </div>
+    </div>
+
     <!-- Landing Page -->
-    <div id="landing" class="page active">
+    <div id="landing" class="page">
         <div class="landing-content">
             <h2>Chào em iu</h2>
             <div class="heart-animation">💕</div>
@@ -294,6 +405,43 @@
     </div>
 
     <script>
+        // Password check function
+        function checkPassword() {
+            const input = document.getElementById('passwordInput');
+            const errorMsg = document.getElementById('errorMessage');
+            const correctPassword = '22011998';
+            
+            if (input.value === correctPassword) {
+                // Correct password - go to landing page
+                document.getElementById('passwordPage').classList.remove('active');
+                document.getElementById('landing').classList.add('active');
+                input.value = ''; // Clear input
+            } else {
+                // Wrong password - show error
+                input.classList.add('error');
+                errorMsg.classList.add('show');
+                
+                setTimeout(() => {
+                    input.classList.remove('error');
+                    errorMsg.classList.remove('show');
+                }, 2000);
+                
+                input.value = '';
+            }
+        }
+
+        // Allow Enter key to submit password
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('passwordInput');
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        checkPassword();
+                    }
+                });
+            }
+        });
+
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slide');
         const totalSlides = slides.length;
