@@ -396,7 +396,7 @@
     <!-- Video Page -->
     <div id="videoPage" class="page">
         <div class="video-content">
-            <video id="loveVideo" controls loop>
+            <video id="loveVideo" controls>
                 <source src="20-10.mp4" type="video/mp4">
                 Trình duyệt của bạn không hỗ trợ video.
             </video>
@@ -405,6 +405,9 @@
     </div>
 
     <script>
+        // Page management
+        let currentPage = 'password';
+        
         // Password check function
         function checkPassword() {
             const input = document.getElementById('passwordInput');
@@ -413,8 +416,7 @@
             
             if (input.value === correctPassword) {
                 // Correct password - go to landing page
-                document.getElementById('passwordPage').classList.remove('active');
-                document.getElementById('landing').classList.add('active');
+                navigateToPage('landing');
                 input.value = ''; // Clear input
             } else {
                 // Wrong password - show error
@@ -429,6 +431,43 @@
                 input.value = '';
             }
         }
+
+        // Navigate between pages with history support
+        function navigateToPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show target page
+            const targetPage = document.getElementById(pageName + 'Page') || document.getElementById(pageName);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                currentPage = pageName;
+                
+                // Push state for browser history
+                history.pushState({ page: pageName }, '', '#' + pageName);
+            }
+        }
+
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', function(event) {
+            if (event.state && event.state.page) {
+                const pageName = event.state.page;
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                
+                const targetPage = document.getElementById(pageName + 'Page') || document.getElementById(pageName);
+                if (targetPage) {
+                    targetPage.classList.add('active');
+                    currentPage = pageName;
+                }
+            }
+        });
+
+        // Initialize first state
+        history.replaceState({ page: 'password' }, '', '#password');
 
         // Allow Enter key to submit password
         document.addEventListener('DOMContentLoaded', function() {
@@ -447,21 +486,30 @@
         const totalSlides = slides.length;
 
         function goToSlideshow() {
-            document.getElementById('landing').classList.remove('active');
-            document.getElementById('slideshow').classList.add('active');
+            navigateToPage('slideshow');
         }
 
         function showSlide(n) {
             slides.forEach(slide => slide.classList.remove('active'));
-            currentSlide = (n + totalSlides) % totalSlides;
+            currentSlide = n;
             slides[currentSlide].classList.add('active');
             
-            // Change button text on last slide
+            // Update button text and visibility
             const nextBtn = document.getElementById('nextBtn');
+            const prevBtn = document.querySelector('.btn-secondary');
+            
+            // Update next button text
             if (currentSlide === totalSlides - 1) {
                 nextBtn.textContent = 'Xem video 🎬';
             } else {
                 nextBtn.textContent = 'Tiếp →';
+            }
+            
+            // Update previous button text
+            if (currentSlide === 0) {
+                prevBtn.textContent = '← Quay lại';
+            } else {
+                prevBtn.textContent = '← Trước';
             }
         }
 
@@ -474,12 +522,16 @@
         }
 
         function previousSlide() {
-            showSlide(currentSlide - 1);
+            if (currentSlide === 0) {
+                // Go back to landing page
+                navigateToPage('landing');
+            } else {
+                showSlide(currentSlide - 1);
+            }
         }
 
         function goToVideo() {
-            document.getElementById('slideshow').classList.remove('active');
-            document.getElementById('videoPage').classList.add('active');
+            navigateToPage('video');
         }
 
         function playVideo() {
